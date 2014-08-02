@@ -1,5 +1,3 @@
-(setq prelude-flyspell nil)
-
 (require 'bind-key)
 
 (bind-keys
@@ -521,3 +519,260 @@ A prefix arg forces clock in of the default task."
 ;;         ("M-F" sp-forward-symbol)
 ;;         ("M-B" sp-backward-symbol)))
 ;; (define-key emacs-lisp-mode-map (kbd ")") 'sp-up-sexp)
+
+(global-set-key (kbd "C-c n") 'indent-and-cleanup-buffer)
+
+(require 'use-package)
+(setq backup-directory-alist `(("." . "~/.saves")))
+
+(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+      backup-directory-alist `((".*" . ,temporary-file-directory)))
+
+(setq cider-popup-stacktraces t)
+(setq cider-auto-select-error-buffer t)
+(setq nrepl-hide-special-buffers nil)
+(setq cider-repl-result-prefix "---> ")
+
+(defun setup-ui ()
+  "Activates UI customizations."
+  (interactive)
+  (blink-cursor-mode 0)
+  (fset 'yes-or-no-p 'y-or-n-p)
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (scroll-bar-mode 0)))
+    (scroll-bar-mode 0))
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (set-default 'truncate-lines t)
+  (electric-indent-mode 1)
+  (setq echo-keystrokes 0.01)
+  (setq frame-title-format '("%f - " user-real-login-name "@" system-name))
+  (setq inhibit-startup-screen t)
+  (scroll-bar-mode 0)
+  (global-auto-revert-mode 1)
+
+  (setq linum-format " %d ")
+  (setq show-paren-delay 0)
+  (setq truncate-partial-width-windows t)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (setq show-help-function nil)
+  (which-function-mode t)
+  (setq confirm-nonexistent-file-or-buffer nil))
+
+(setup-ui)
+
+(setq default-frame-alist '((font-backend . "xft")
+                            (font . "Fantasque Sans Mono-10")
+                            (vertical-scroll-bars . 0)
+                            (menu-bar-lines . 0)
+                            (tool-bar-lines . 0)))
+
+
+
+(global-rainbow-delimiters-mode)
+(setq recentf-max-menu-items 300)
+(add-hook 'cider-repl-mode-hook 'subword-mode)
+(add-hook 'clojure-mode-hook 'subword-mode)
+
+(setq byte-compile-warnings '(not nresolved
+                                  free-vars
+                                  callargs
+                                  redefine
+                                  obsolete
+                                  noruntime
+                                  cl-functions
+                                  interactive-only))
+
+(setq inferior-lisp-program "sbcl")
+
+(defvar tex-compile-commands
+  '(("pdflatex --interaction=nonstopmode %f")))
+
+(setq x-select-enable-clipboard t)
+
+(whole-line-or-region-mode +1)
+
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-doc)
+
+;; (use-package helm-swoop
+;;   :commands helm-swoop
+;;   :init
+;;   (bind-key "C-s" 'helm-swoop)
+;;   :config (progn (setq helm-swoop-font-size-change: nil)
+;;               (setq helm-swoop-pre-input-function (lambda ()
+;;                                                     "Pre input function. Utilize region and at point symbol"
+;;                                                     ""))))
+
+(setq slime-lisp-implementations '(("sbcl" ("sbcl" "--dynamic-space-size" "2048"))))
+
+(global-set-key (kbd "C-<tab>") 'list-command-history)
+(global-set-key (kbd "C-x C-r") 'helm-recentf)
+(global-set-key (kbd "C-c h") 'helm-mini)
+(recentf-mode 1)
+
+(global-set-key (kbd "<f1>") 'eshell)
+(global-set-key (kbd "C-z") 'zop-to-char)
+
+(global-set-key (kbd "C-x g") 'ag)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+;; (require 'shm)
+;; (add-hook 'haskell-mode-hook 'structured-haskell-mode)
+
+
+(ido-mode 1)
+(ido-everywhere 1)
+
+(setq ido-use-faces nil)
+
+(require 'clj-refactor)
+(add-hook 'clojure-mode-hook (lambda ()
+                               (clj-refactor-mode 1)
+                               (cljr-add-keybindings-with-prefix "C-c C-a")
+                               ))
+
+;; (add-hook 'clojure-mode-hook 'yas/minor-mode-on)
+
+;; (require 'yasnippet)
+;; (yas/load-directory "~/.emacs.d/snippets")
+
+(defun push-mark-no-activate ()
+  (interactive)
+  (push-mark (point) t nil)
+  (message "Pushed mark to ring"))
+
+(defun jump-to-mark ()
+  (interactive)
+  (set-mark-command 1))
+
+(global-set-key (kbd "C-+") 'push-mark-no-activate)
+(global-set-key (kbd "M-+") 'jump-to-mark)
+(global-set-key (kbd "C-c y") 'browse-kill-ring)
+;; (global-set-key (kbd "C-r") 'er/expand-region)
+;; (setq-default line-spacing 0)
+
+;; (require 'cider)
+;; (require 'cider-macroexpansion)
+;; (add-hook 'cider-mode-hook 'cider-macroexpansion-minor-mode)
+(global-set-key (kbd "C-h C-m") 'discover-my-major)
+
+;; (require 'latex)
+
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e/")
+(require 'mu4e)
+
+(setq mu4e-maildir "~/Maildir/john.lou.walker")
+
+(setq mu4e-drafts-folder "/[Gmail].Drafts")
+(setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+(setq mu4e-trash-folder  "/[Gmail].Trash")
+
+;; don't save message to Sent Messages, Gmail/IMAP takes care of this
+(setq mu4e-sent-messages-behavior 'delete)
+
+;; setup some handy shortcuts
+;; you can quickly switch to your Inbox -- press ``ji''
+;; then, when you want archive some messages, move them to
+;; the 'All Mail' folder by pressing ``ma''.
+
+(setq mu4e-maildir-shortcuts
+      '( ("/INBOX"               . ?i)
+         ("/[Gmail].Sent Mail"   . ?s)
+         ("/[Gmail].Trash"       . ?t)
+         ("/[Gmail].All Mail"    . ?a)))
+
+;; allow for updating mail using 'U' in the main view:
+(setq mu4e-get-mail-command "offlineimap")
+
+;; something about ourselves
+(setq
+ user-mail-address "john.lou.walker@gmail.com"
+ user-full-name  "John L. Walker"
+ mu4e-compose-signature
+ (concat
+  "John L. Walker\n"
+  "http://johnwalker.github.io\n"))
+
+(require 'smtpmail)
+
+;; alternatively, for emacs-24 you can use:
+(setq message-send-mail-function 'smtpmail-send-it
+      smtpmail-stream-type 'starttls
+      smtpmail-default-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587)
+
+;; don't keep message buffers around
+(setq message-kill-buffer-on-exit t)
+
+;; (require 'workgroups2)
+
+;; (setq wg-prefix-key (kbd "s-s"))
+;; (setq wg-default-session-file "~/.emacs.d/.emacs_workgroups")
+
+;; (global-set-key (kbd "s-s s-r")     'wg-reload-session)
+;; (global-set-key (kbd "s-s s-s") 'wg-save-session)
+;; (global-set-key (kbd "s-s s-w") 'wg-switch-to-workgroup)
+;; (global-set-key (kbd "s-s s-p")         'wg-switch-to-previous-workgroup)
+;; (workgroups-mode 1)
+
+(require 'cl)
+(defun save-frame-configuration ()
+  (interactive)
+  (let
+      ((fs)(f))
+    (setq fs (loop for c in (cdr (current-frame-configuration))
+                   collect (progn
+                             (setq f (cadr c))
+                             (reduce (lambda (acc a) (if (find (symbol-name (car a)) '("top" "left" "width" "height") :test 'equal) (cons a acc) acc)) f :initial-value 'nil)
+                             )))
+    ;; fs contains a list of attribs for each frame
+    (save-window-excursion
+      (find-file "~/.e_last_frame_config.el")
+      (erase-buffer)
+      (print (cons 'version 1) (current-buffer))
+      (print fs (current-buffer))
+      (save-buffer))))
+
+(defun load-frame-configuration ()
+
+  "load the last saved frame configuration, if it exists"
+  (interactive)
+  (let
+      ((v) (fs))
+    (if (file-exists-p "~/.e_last_frame_config.el")
+        (save-window-excursion
+          (find-file "~/.e_last_frame_config.el")
+          (beginning-of-buffer)
+          (setq v (read (current-buffer)))
+          (if (not (and (equal 'version (car v)) (= 1 (cdr v))))
+              (error "version %i not understood" (cdr v)))
+          (setq fs (read (current-buffer)))
+          (loop for f in fs do
+                (make-frame f)))
+      (message "~/.e_last_frame_config.el not found. not loaded"))))
+
+
+
+(global-set-key (kbd "s-SPC") 'rectangle-mark-mode)
+
+(global-set-key (kbd "C-<up>") 'scroll-up-line)
+(global-set-key (kbd "C-<down>") 'scroll-down-line)
+
+(add-hook 'after-make-frame-functions
+          '(lambda (frame)
+             (modify-frame-parameters frame
+                                      '((vertical-scroll-bars . nil)
+                                        (horizontal-scroll-bars . nil)))))
+
+(horizontal-scroll-bar-mode -1)
+(scroll-bar-mode -1)
+
+(set-frame-parameter (selected-frame) 'alpha '(85 50))
+
+(require 'register-channel)
+(register-channel-mode 1)
